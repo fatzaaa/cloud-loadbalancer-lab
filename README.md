@@ -63,6 +63,21 @@ Untuk tes 1 replika, aku beri tanda `#` pada dua baris `server` terakhir di `ngi
 
 ![Distribusi request dan hasil load test 3 replika](docs/hasil-tes.png)
 
+### Uji batas kapasitas
+
+Selain tes dengan 20 pengguna, disini kita naikkan beban bertahap sampai 200 pengguna bersamaan (`loadtest/test-ramp.js`, 3 replika).
+
+| Metrik | 20 pengguna | Naik sampai 200 pengguna |
+|---|---|---|
+| Request per detik | 39.90 | 39.44 |
+| Latensi rata-rata | 489 ms | 2.39 s |
+| Latensi p(95) | 764 ms | 4.95 s |
+| Request gagal | 0% | 0% |
+
+![Hasil uji batas kapasitas sampai 200 pengguna](docs/hasil-ramp.png)
+
+
+
 ## Analisis
 
 Dengan 3 replika, throughput naik sekitar 2,7x dan latensi rata-rata turun sekitar 2,7x. Itu sekitar 91% dari skala ideal 3x. Dengan 1 replika, 20 user mengantre di satu worker, jadi latensi naik jauh di atas waktu proses satu request (~70 ms). Menambah replika membagi antrean itu.
@@ -70,6 +85,9 @@ Dengan 3 replika, throughput naik sekitar 2,7x dan latensi rata-rata turun sekit
 Hasilnya tidak mencapai 3x penuh karena:
 - ketiga container berjalan di mesin yang sama dan berbagi CPU,
 - Nginx dan jaringan internal Docker menambah overhead kecil.
+
+hasil dinaikan 200 pengguna
+Throughput tetap di sekitar 40 request per detik walaupun pengguna bertambah 10x. Artinya kapasitas maksimum 3 replika sudah tercapai, dan pengguna tambahan hanya menambah antrean (latensi naik sekitar 6x). Menariknya tidak ada request yang gagal, sistem melambat secara bertahap, bukan error.
 
 ## Catatan masalah yang kutemui
 
